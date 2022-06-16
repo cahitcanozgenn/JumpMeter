@@ -1,74 +1,141 @@
 #include "NewPing.h"
-int sagOnTriggerPin = 9;
-int sagOnEchoPin = 10;
+#include <LiquidCrystal_I2C.h>
 
-int sagArkaTriggerPin = 24 ;
-int sagArkaEchoPin = 22;
+#include <Wire.h>
 
-int maxUzunluk=400;
+LiquidCrystal_I2C lcdekranim(0x27,16,2);
 
-NewPing sonar(sagOnTriggerPin,sagOnEchoPin,maxUzunluk);
-NewPing sonar2(sagArkaTriggerPin,sagArkaEchoPin,maxUzunluk);
-float duration, distance , distance2;  // duration=süre distance=mesafe
+int SagTg = 9; 
+int SagEC = 10;  
 
-void setup() 
+int SolTG = 5; 
+int SolEC = 6;  
+
+int SagOnTg = 12; 
+int SagOnEC = 11;  
+
+int SolOnTG = 4; 
+int SolOnEC = 3;  
+
+int SolUzunluk = 400;
+int SagUzunluk = 400;
+
+int SolOnUzunluk = 400;
+int SagOnUzunluk = 400;
+NewPing sol(SolTG,SolEC,SolUzunluk);
+NewPing sag(SagTg,SagEC,SagUzunluk);
+NewPing solOn(SolOnTG,SolOnEC,SolOnUzunluk);
+NewPing sagOn(SagOnTg,SagOnEC,SagOnUzunluk);
+///arka
+int SagSensor()
 {
-  pinMode(sagOnTriggerPin, OUTPUT);
-  pinMode(sagOnEchoPin, INPUT);
+return sag.ping_cm();
+}
+int SolSensor()
+{
+return sol.ping_cm();
+}
 
-  pinMode(sagArkaTriggerPin, OUTPUT);
-  pinMode(sagArkaEchoPin, INPUT);
+///Ön
+int SagOnSensor()
+{
+return sagOn.ping_cm();
+}
+int SolOnSensor()
+{
+return solOn.ping_cm();
+}
+
+void setup() {
+  pinMode(SagTg, OUTPUT); 
+  pinMode(SagEC,INPUT); 
+
+  pinMode(SolTG, OUTPUT); 
+  pinMode(SolEC,INPUT);
   Serial.begin(9600);
+  Serial.println("Başladı");
+
+  lcdekranim.init();
+  lcdekranim.backlight();
+  lcdekranim.setCursor(0,0);
+  lcdekranim.print("Ziplama Olcer");
+  delay(1000);
+  lcdekranim.clear();
 }
 
-void loop() 
-{
-  sagOnSensor();
-  //sagArkaSensor();
- 
+int maxSag = 0;
+int maxSol = 0;
+int maxSagOn = 0;
+int maxSolOn = 0;
+
+
+void loop() {
+int sol = SolSensor();
+int sag = SagSensor();
+
+int solOn = SolOnSensor();
+int sagOn = SagOnSensor();
+
+
+
+delay(100);
+//Serial.println();
+//Serial.println();
+Serial.print("Sol Arka: ");
+Serial.print(sol);
+Serial.print("  Sag Arka: ");
+Serial.print(sag);
+Serial.print("  Sol Ön: ");
+Serial.print(solOn);
+Serial.print("  Sag Ön: ");
+Serial.print(sagOn);
+Serial.println();
+//Serial.println();
+
+
+if (sag >= maxSag){
+  maxSag = sag;
+  }
+if (sol >= maxSol){
+maxSol = sol;
+}
+if (sagOn >= maxSagOn){
+  maxSagOn = sagOn;
+  }
+if (solOn >= maxSolOn){
+maxSolOn = solOn;
 }
 
-void sagOnSensor()
-{
-
-  distance = sonar.ping_cm();
-  Serial.print("Yükseklik = ");
-  
-  if (distance >= 120 || distance <= 2) 
-  {
+  lcdekranim.setCursor(0,0);
+ lcdekranim.print("SagAr:");
+  lcdekranim.setCursor(6,0);
+ lcdekranim.print(maxSag);
  
-    Serial.println("0 cm");
-  }
-
-  else 
-  {
-    
-    Serial.print(distance);
-    Serial.println("cm");
-
-
-  }
-  delay(50);
-}
-
-void sagArkaSensor()
-{
-  distance2 = sonar2.ping_cm();
-  Serial.print("Yükseklik2 = ");
-  
-  if (distance2 >= 120 || distance2 <= 2) 
-  {
+  lcdekranim.setCursor(10,0);
+ lcdekranim.print("On:");
+  lcdekranim.setCursor(13,0);
+ lcdekranim.print(maxSagOn);
  
-    Serial.println("0 cm");
-  }
+ lcdekranim.setCursor(0,1);
+ lcdekranim.print("SolAr:");
+  lcdekranim.setCursor(6,1);
+ lcdekranim.print(maxSol);
 
-  else 
-  {
-    
-    Serial.print(distance2);
-    Serial.println("cm");
+   lcdekranim.setCursor(10,1);
+ lcdekranim.print("On:");
+  lcdekranim.setCursor(13,1);
+ lcdekranim.print(maxSagOn);
 
+ 
+Serial.print("Max Sağ Arka Deger: ");
+Serial.print(maxSag);
+Serial.print(" Max Sol Arka Deger: ");
+Serial.print(maxSol);
+Serial.println();
+Serial.print("Max Sağ Ön Deger: ");
+Serial.print(maxSagOn);
+Serial.print(" Max Sol Ön Deger: ");
+Serial.print(maxSolOn);
+Serial.println();
 
-  }
-  delay(50);
 }
